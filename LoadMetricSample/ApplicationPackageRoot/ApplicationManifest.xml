@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="LoadMetricSample" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters>
+    <Parameter Name="LoadMetricStateless_InstanceCount" DefaultValue="-1" />
+    <Parameter Name="LoadMetricActorService_PartitionCount" DefaultValue="10" />
+    <Parameter Name="LoadMetricActorService_MinReplicaSetSize" DefaultValue="2" />
+    <Parameter Name="LoadMetricActorService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="LoadMetricStateful_MinReplicaSetSize" DefaultValue="2" />
+    <Parameter Name="LoadMetricStateful_PartitionCount" DefaultValue="10" />
+    <Parameter Name="LoadMetricStateful_TargetReplicaSetSize" DefaultValue="3" />
+  </Parameters>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="LoadMetricStatelessPkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+  </ServiceManifestImport>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="LoadMetricActorPkg" ServiceManifestVersion="1.0.0" />
+  </ServiceManifestImport>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="LoadMetricStatefulPkg" ServiceManifestVersion="1.0.0" />
+  </ServiceManifestImport>
+  <DefaultServices>
+    <Service Name="LoadMetricStateless">
+      <StatelessService ServiceTypeName="LoadMetricStatelessType" InstanceCount="[LoadMetricStateless_InstanceCount]">
+        <SingletonPartition />
+        <LoadMetrics>
+          <LoadMetric Name="RequestsPerMinute" DefaultLoad="4" Weight="High" />
+          <LoadMetric Name="Count" DefaultLoad="1" Weight="Low" />
+        </LoadMetrics>
+      </StatelessService>
+    </Service>
+    <Service Name="LoadMetricActorService" GeneratedIdRef="1e073b62-6ae1-4153-a2b3-04e073bc243a|Persisted">
+      <StatefulService ServiceTypeName="LoadMetricActorServiceType" TargetReplicaSetSize="[LoadMetricActorService_TargetReplicaSetSize]" MinReplicaSetSize="[LoadMetricActorService_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[LoadMetricActorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+        <LoadMetrics>
+          <LoadMetric Name="RequestsPerMinute" DefaultLoad="4" Weight="High" />
+          <LoadMetric Name="Count" DefaultLoad="1" Weight="Low" />
+          <LoadMetric Name="PrimaryCount" PrimaryDefaultLoad="1" Weight="Medium" />
+          <LoadMetric Name="ReplicaCount" PrimaryDefaultLoad="1" SecondaryDefaultLoad="1" Weight="Low" />
+        </LoadMetrics>
+      </StatefulService>
+    </Service>
+    <Service Name="LoadMetricStateful">
+      <StatefulService ServiceTypeName="LoadMetricStatefulType" TargetReplicaSetSize="[LoadMetricStateful_TargetReplicaSetSize]" MinReplicaSetSize="[LoadMetricStateful_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[LoadMetricStateful_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+        <LoadMetrics>
+          <LoadMetric Name="RequestsPerMinute" DefaultLoad="10" Weight="High" />
+          <LoadMetric Name="Count" DefaultLoad="1" Weight="Low" />
+          <LoadMetric Name="PrimaryCount" PrimaryDefaultLoad="1" Weight="Medium" />
+          <LoadMetric Name="ReplicaCount" PrimaryDefaultLoad="1" SecondaryDefaultLoad="1" Weight="Low" />
+        </LoadMetrics>
+      </StatefulService>
+    </Service>
+  </DefaultServices>
+</ApplicationManifest>
